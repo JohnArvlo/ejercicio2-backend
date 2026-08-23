@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="caso2-solucion.application/caso2-solucion.application.csproj" />
+  <Project Path="caso2-solucion.domain/caso2-solucion.domain.csproj" Id="42bed9eb-aa5a-4ab9-bb4e-e33ed49dd599" />
+  <Project Path="caso2-solucion.infrastructure/caso2-solucion.infrastructure.csproj" />
+  <Project Path="caso2-solucion/caso2-solucion.API.csproj" />
+</Solution>
