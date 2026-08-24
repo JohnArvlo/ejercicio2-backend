@@ -57,6 +57,5 @@ Proveedores (SupplierController, ruta base api/suppliers, requiere token):
 Requisitos: tener SQL Server corriendo (local, Docker o remoto) y accesible con la cadena de conexión configurada.
  
 1. Completar ConnectionStrings:DefaultConnection y la sección Jwt en appsettings.Development.json.
-2. Aplicar migraciones (dotnet ef database update), o dejar que la app las aplique al iniciar si así está configurado.
 3. Ejecutar el proyecto API (dotnet run, o desde Visual Studio/Rider).
-4. La documentación interactiva de Swagger queda disponible en el entorno de desarrollo, normalmente en la raíz o en /swagger.
+4. La documentación interactiva de Swagger queda disponible en el entorno de desarrollo, en /swagger.
