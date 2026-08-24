@@ -8,6 +8,7 @@ using caso2_solucion.application.Proveedores.Queries.GetProveedoresList;
 using caso2_solucion.application.Suppliers.Commands.UpdateSupplier;
 using caso2_solucion.domain.entities;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace caso2_solucion.Controllers
@@ -23,10 +24,12 @@ namespace caso2_solucion.Controllers
             _mediator = mediator;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> ObtenerTodos()
             => Ok(await _mediator.Send(new GetSuppliersListQuery()));
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> ObtenerPorId(int id)
         {
@@ -34,6 +37,7 @@ namespace caso2_solucion.Controllers
             return supplier is null ? NotFound() : Ok(supplier);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Crear([FromBody] CreateSupplierCommand command)
         {
@@ -65,6 +69,7 @@ namespace caso2_solucion.Controllers
             return CreatedAtAction(nameof(ObtenerPorId), new { id }, id);
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSupplier(int id)
         {
@@ -72,6 +77,7 @@ namespace caso2_solucion.Controllers
             return NoContent();
         }
 
+        [Authorize]
         [HttpPatch("{id}")]
         public async Task<IActionResult> SoftDeleteSupplier(int id)
         {
@@ -79,6 +85,7 @@ namespace caso2_solucion.Controllers
             return NoContent();
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateSupplierRequest request)
         {

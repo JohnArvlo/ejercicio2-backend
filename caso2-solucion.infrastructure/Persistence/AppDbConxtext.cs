@@ -10,6 +10,7 @@ namespace caso2_solucion.infrastructure.Persistence
             : base(options) {}
 
         public DbSet<Supplier> Suppliers => Set<Supplier>();
+        public DbSet<User> Users => Set<User>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
