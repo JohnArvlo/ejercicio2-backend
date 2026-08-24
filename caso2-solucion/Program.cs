@@ -1,4 +1,6 @@
+using caso2_solucion.application.Common.Interfaces;
 using caso2_solucion.application.Interfaces;
+using caso2_solucion.infrastructure;
 using caso2_solucion.infrastructure.Persistence;
 using caso2_solucion.infrastructure.Repositories;
 using caso2_solucion.infrastructure.Security;
@@ -74,11 +76,27 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddAuthorization();
 
+builder.Services.AddHttpClient<IScreeningApiClient, ScreeningApiClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Screening:BaseUrl"]!);
+});
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(ISupplierRepository).Assembly));
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(ISupplierRepository).Assembly);
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // el puerto donde corre React frontend
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 
 var app = builder.Build();
 
@@ -89,6 +107,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowReactApp");
 app.UseAuthentication();//autenticacion antes de useauthorization
 app.UseAuthorization();
 app.MapControllers();
@@ -96,7 +115,6 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    context.Database.EnsureDeleted();
     context.Database.EnsureCreated();
 }
 

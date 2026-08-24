@@ -5,6 +5,8 @@ using caso2_solucion.application.Proveedores.Commands.DeleteProveedor;
 using caso2_solucion.application.Proveedores.Commands.UpdateProveedorCommand;
 using caso2_solucion.application.Proveedores.Queries.GetProveedorById;
 using caso2_solucion.application.Proveedores.Queries.GetProveedoresList;
+using caso2_solucion.application.Screening.Commands.RunScreening;
+using caso2_solucion.application.Screening.Dtos;
 using caso2_solucion.application.Suppliers.Commands.UpdateSupplier;
 using caso2_solucion.domain.entities;
 using MediatR;
@@ -14,7 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace caso2_solucion.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/suppliers")]
     public class SupplierController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -26,12 +28,13 @@ namespace caso2_solucion.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> ObtenerTodos()
+
+        public async Task<IActionResult> GetAllSuppliers()
             => Ok(await _mediator.Send(new GetSuppliersListQuery()));
 
         [Authorize]
         [HttpGet("{id}")]
-        public async Task<IActionResult> ObtenerPorId(int id)
+        public async Task<IActionResult> GetBySupplierId(int id)
         {
             var supplier = await _mediator.Send(new GetSupplierByIdQuery(id));
             return supplier is null ? NotFound() : Ok(supplier);
@@ -39,7 +42,7 @@ namespace caso2_solucion.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Crear([FromBody] CreateSupplierCommand command)
+        public async Task<IActionResult> CreateSupplier([FromBody] CreateSupplierCommand command)
         {
             if (string.IsNullOrWhiteSpace(command.TaxId))
             {
@@ -66,7 +69,7 @@ namespace caso2_solucion.Controllers
             }
 
             var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(ObtenerPorId), new { id }, id);
+            return CreatedAtAction(nameof(GetBySupplierId), new { id }, id);
         }
 
         [Authorize]
@@ -87,7 +90,7 @@ namespace caso2_solucion.Controllers
 
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateSupplierRequest request)
+        public async Task<IActionResult> UpdateSupplier(int id, [FromBody] UpdateSupplierRequest request)
         {
             var command = new UpdateSupplierCommand(
                 id,
@@ -108,6 +111,20 @@ namespace caso2_solucion.Controllers
                 return NotFound();
 
             return NoContent();
+        }
+
+
+        /// <param name="request">Fuentes a consultar: ofac, worldbank, icij (mínimo 1, máximo 3).</param>
+        [Authorize]
+        [HttpPost("{id}/screening")]
+        public async Task<IActionResult> RunScreening(int id, [FromBody] RunScreeningRequest request)
+        {
+            if (request.Sources is null || request.Sources.Count == 0 || request.Sources.Count > 3)
+                return BadRequest(new { message = "Debes seleccionar entre 1 y 3 fuentes." });
+
+            var sourceNames = request.Sources.Select(s => s.ToString()).ToList();
+            var result = await _mediator.Send(new RunScreeningCommand(id, sourceNames));
+            return Ok(result);
         }
 
     }
