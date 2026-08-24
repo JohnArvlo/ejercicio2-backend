@@ -44,8 +44,17 @@ builder.Services.AddSwaggerGen(options =>
 
 
 // Base de datos 
+//builder.Services.AddDbContext<AppDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTIONSTRING")
+    ?? throw new InvalidOperationException("No se encontró ninguna connection string configurada.");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure()));
+
 
 // Repository DI
 builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
@@ -118,11 +127,25 @@ app.UseAuthentication();//autenticacion antes de useauthorization
 app.UseAuthorization();
 app.MapControllers();
 
+//using (var scope = app.Services.CreateScope())
+//{
+//    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//    context.Database.EnsureCreated();
+//}
+
+
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated();
+    try
+    {
+        context.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "No se pudo conectar/crear la base de datos al iniciar.");
+    }
 }
-
 
 app.Run();
