@@ -115,11 +115,9 @@ var app = builder.Build();
 
 app.UseMiddleware<caso2_solucion.Middleware.ExceptionHandlingMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
